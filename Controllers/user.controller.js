@@ -7,7 +7,6 @@ const { ModuleNode } = require("vite");
 const fetchUser = async (req, res) => {
   try {
     const users = await User.find({});
-    users.push({ name: "hi" });
     return res.status(200).json(users);
   } catch {
     res.status(500).message("Couldn't fetch users.");
@@ -104,6 +103,27 @@ const updateUser = async (req, res) => {
   }
 };
 
+const loginFunc = async (req, res) => {
+  try {
+    const userExists = await User.findOne({ username: req.body.username });
+    if (!userExists){
+      return res.status(400).json('wrong credentials')
+    }
+    const isMatch = await bcrypt.compare(
+      req.body.password,
+      userExists.password
+    );
+    if (isMatch==true) {
+      const token = jwt.sign({ username: userExists.username }, process.env.SECRET, {expiresIn: "24h"});
+      return res.status(200).json({token:token,isAdmin:userExists.isAdmin});
+    } else {
+      return res.status(400).json("wrong username/password");
+    }
+  } catch (err) {
+    res.status(500).json(err.message);
+  }
+};
+
 // const getUser = async (req, res) => {
 //   try {
 //     const realId = jwt.verify(req.headers.token, process.env.SECRET);
@@ -120,5 +140,6 @@ module.exports = {
   createUser,
   deleteUser,
   updateUser,
+  loginFunc
   // getUser,
 };
