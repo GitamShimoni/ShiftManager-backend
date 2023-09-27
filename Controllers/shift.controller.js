@@ -11,7 +11,6 @@ const fetchAllShifts = async (req, res) => {
   }
 };
 
-
 const CreateShiftRequest = async (req, res) => {
   console.log("hii")
   const {
@@ -43,7 +42,8 @@ const CreateShiftRequest = async (req, res) => {
     console.log(newShift)
     return res.status(200).json(newShift);
   } catch (err) {
-    res.status(500).json(err + "Shift Could Not Be Created!");
+    res.status(500).json(err + "Shift Could Not Be Created!")
+  }}
 
 const CreateNewShift = async (req, res) => {
   const { token, shifts } = req.body;
@@ -60,6 +60,5 @@ const CreateNewShift = async (req, res) => {
 module.exports = {
   fetchAllShifts,
   CreateShiftRequest,
-  CreateNewShift,
-
-};
+  CreateNewShift
+}
