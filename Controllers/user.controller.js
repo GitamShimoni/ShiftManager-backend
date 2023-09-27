@@ -106,21 +106,42 @@ const updateUser = async (req, res) => {
 const loginFunc = async (req, res) => {
   try {
     const userExists = await User.findOne({ username: req.body.username });
-    if (!userExists){
-      return res.status(400).json('wrong credentials')
+    if (!userExists) {
+      return res.status(400).json("wrong credentials");
     }
     const isMatch = await bcrypt.compare(
       req.body.password,
       userExists.password
     );
-    if (isMatch==true) {
-      const token = jwt.sign({ username: userExists.username }, process.env.SECRET, {expiresIn: "24h"});
-      return res.status(200).json({token:token,isAdmin:userExists.isAdmin});
+    if (isMatch == true) {
+      const token = jwt.sign(
+        { username: userExists.username },
+        process.env.SECRET,
+        { expiresIn: "24h" }
+      );
+      return res
+        .status(200)
+        .json({ token: token, isAdmin: userExists.isAdmin });
     } else {
       return res.status(400).json("wrong username/password");
     }
   } catch (err) {
     res.status(500).json(err.message);
+  }
+};
+
+const getUserShifts = async (req, res) => {
+  try {
+    const { token } = req.body;
+    console.log("Got into the function");
+    const username = jwt.verify(token, process.env.SECRET);
+    console.log(username);
+    const CurrentUser = await User.findOne({
+      username: username.username,
+    }).populate("shifts");
+    return res.status(200).json(CurrentUser.shifts);
+  } catch {
+    return res.status(500).json("Couldn't return user's shifts");
   }
 };
 
@@ -140,6 +161,7 @@ module.exports = {
   createUser,
   deleteUser,
   updateUser,
-  loginFunc
+  loginFunc,
+  getUserShifts,
   // getUser,
 };
